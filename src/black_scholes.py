@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.stats as norm 
+from scipy.stats import norm
 
 def d1(S, K, T, r, sigma):
     return (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
