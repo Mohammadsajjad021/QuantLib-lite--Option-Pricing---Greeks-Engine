@@ -1,5 +1,5 @@
 def test_call_bounds():
-    from src.black_scholes import call_price
+    from black_scholes import call_price
     import numpy as np
 
     S, K, T, r, sigma = 100, 100, 1, 0.05, 0.2
