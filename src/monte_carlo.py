@@ -56,3 +56,37 @@ def monte_carlo_call_put(S0,K,T,r,sigma,n_sim=100000):
     payoff = 0.5*(payoff1 + payoff2)
 
     return np.exp(-r*T)*np.mean(payoff)
+
+def monte_carlo_call_control(S0,K,T,r,sigma,n_sim=100000):
+    ST = simulate_terminal_price(S0, T, r, sigma, n_sim)
+
+    X = np.maximum(ST-K,0)      
+    Y = ST                     
+
+    EY = S0*np.exp(r*T)
+
+    cov_xy = np.cov(X,Y, ddof=1)[0,1]
+    var_y = np.var(Y, ddof=1)
+
+    b = cov_xy / var_y
+
+    X_cv = X - b*(Y - EY)
+
+    return np.exp(-r*T)*np.mean(X_cv)
+
+def monte_carlo_call_control(S0,K,T,r,sigma,n_sim=100000):
+    ST = simulate_terminal_price(S0, T, r, sigma, n_sim)
+
+    X = np.maximum(K-ST,0)      
+    Y = ST                     
+
+    EY = S0*np.exp(r*T)
+
+    cov_xy = np.cov(X,Y, ddof=1)[0,1]
+    var_y = np.var(Y, ddof=1)
+
+    b = cov_xy / var_y
+
+    X_cv = X - b*(Y - EY)
+
+    return np.exp(-r*T)*np.mean(X_cv)
