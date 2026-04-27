@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.stats import norm
 
 def simulate_terminal_price(S0, T, r, sigma, n_sim):
     Z = np.random.standard_normal(n_sim)
@@ -21,7 +21,16 @@ def simulate_terminal_price_anithetic(S0, T, r, sigma, n_sim):
 
     return ST1, ST2
 
-def monte_carlo_call(S0, K, T, r, sigma, n_sim=100000):
+def simulate_terminal_price_stratified(S0, T, r, sigma, n_sim):
+    U = (np.arange(n_sim) + np.random.rand(n_sim)) / n_sim
+    Z = norm.ppf(U)
+
+    drift = r - 0.5 * sigma**2 * T
+    vol = sigma * np.sqrt(T)
+    
+    return S0 * np.exp(drift + vol * Z)
+
+def monte_carlo_call_naive(S0, K, T, r, sigma, n_sim=100000):
     ST = simulate_terminal_price(S0, T, r, sigma, n_sim)
 
     payoff = np.maximum(ST - K, 0)
@@ -29,7 +38,7 @@ def monte_carlo_call(S0, K, T, r, sigma, n_sim=100000):
     return np.exp(-r * T) * np.mean(payoff)
 
 
-def monte_carlo_put(S0, K, T, r, sigma, n_sim=100000):
+def monte_carlo_put_naive(S0, K, T, r, sigma, n_sim=100000):
     ST = simulate_terminal_price(S0, T, r, sigma, n_sim)
 
     payoff = np.maximum(K - ST, 0)
@@ -90,3 +99,40 @@ def monte_carlo_put_control(S0,K,T,r,sigma,n_sim=100000):
     X_cv = X - b*(Y - EY)
 
     return np.exp(-r*T)*np.mean(X_cv)
+
+def monte_carlo_call_stratified(S0, K, T, r, sigma, n_sim=100000):
+    ST = simulate_terminal_price_stratified(S0, T, r, sigma, n_sim)
+
+    payoff = np.maximum(ST - K, 0)
+
+    return np.exp(-r * T) * np.mean(payoff)
+
+
+def monte_carlo_put_stratified(S0, K, T, r, sigma, n_sim=100000):
+    ST = simulate_terminal_price_stratified(S0, T, r, sigma, n_sim)
+
+    payoff = np.maximum(K - ST, 0)
+
+    return np.exp(-r * T) * np.mean(payoff)
+
+def monte_carlo_call(S0, K, T, r, sigma, n_sim=100000, type='naive'):
+    match type:
+        case 'naive':
+            monte_carlo_call_naive(S0, K, T, r, sigma, n_sim=100000)
+        case 'antithetic':
+            monte_carlo_call_antithetic(S0, K, T, r, sigma, n_sim=100000)
+        case 'control':
+            monte_carlo_call_control(S0, K, T, r, sigma, n_sim=100000)
+        case 'stratified':
+            monte_carlo_call_stratified(S0, K, T, r, sigma, n_sim=100000)
+
+def monte_carlo_put(S0, K, T, r, sigma, n_sim=100000, type='naive'):
+    match type:
+        case 'naive':
+            monte_carlo_put_naive(S0, K, T, r, sigma, n_sim=100000)
+        case 'antithetic':
+            monte_carlo_put_antithetic(S0, K, T, r, sigma, n_sim=100000)
+        case 'control':
+            monte_carlo_put_control(S0, K, T, r, sigma, n_sim=100000)
+        case 'stratified':
+            monte_carlo_put_stratified(S0, K, T, r, sigma, n_sim=100000) 
