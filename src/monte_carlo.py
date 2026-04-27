@@ -115,8 +115,8 @@ def monte_carlo_put_stratified(S0, K, T, r, sigma, n_sim=100000):
 
     return np.exp(-r * T) * np.mean(payoff)
 
-def monte_carlo_call(S0, K, T, r, sigma, n_sim=100000, type='naive'):
-    match type:
+def monte_carlo_call(S0, K, T, r, sigma, n_sim=100000, mode='naive'):
+    match mode:
         case 'naive':
             monte_carlo_call_naive(S0, K, T, r, sigma, n_sim=100000)
         case 'antithetic':
@@ -126,8 +126,8 @@ def monte_carlo_call(S0, K, T, r, sigma, n_sim=100000, type='naive'):
         case 'stratified':
             monte_carlo_call_stratified(S0, K, T, r, sigma, n_sim=100000)
 
-def monte_carlo_put(S0, K, T, r, sigma, n_sim=100000, type='naive'):
-    match type:
+def monte_carlo_put(S0, K, T, r, sigma, n_sim=100000, mode='naive'):
+    match mode:
         case 'naive':
             monte_carlo_put_naive(S0, K, T, r, sigma, n_sim=100000)
         case 'antithetic':
