@@ -47,7 +47,7 @@ def monte_carlo_call_antithetic(S0,K,T,r,sigma,n_sim=100000):
 
     return np.exp(-r*T)*np.mean(payoff)
 
-def monte_carlo_call_put(S0,K,T,r,sigma,n_sim=100000):
+def monte_carlo_put_antithetic(S0,K,T,r,sigma,n_sim=100000):
     ST1 , ST2 = simulate_terminal_price_anithetic(S0, T, r, sigma, n_sim)
     
     payoff1 = np.maximum(K-ST1,0)
@@ -74,7 +74,7 @@ def monte_carlo_call_control(S0,K,T,r,sigma,n_sim=100000):
 
     return np.exp(-r*T)*np.mean(X_cv)
 
-def monte_carlo_call_control(S0,K,T,r,sigma,n_sim=100000):
+def monte_carlo_put_control(S0,K,T,r,sigma,n_sim=100000):
     ST = simulate_terminal_price(S0, T, r, sigma, n_sim)
 
     X = np.maximum(K-ST,0)      
