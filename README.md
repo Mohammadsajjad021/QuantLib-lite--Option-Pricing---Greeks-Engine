@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/Mohammadsajjad021/QuantLib-lite--Option-Pricing---Greeks-Engine/actions/workflows/ci.yml/badge.svg)
 
-Python library for pricing European options and computing Greeks using analytical and numerical methods.
+Python library for pricing options and computing Greeks using analytical and numerical methods.
 
 ---
 
@@ -10,7 +10,8 @@ Python library for pricing European options and computing Greeks using analytica
 
 * Black–Scholes pricing (call & put)
 * Monte Carlo simulation
-* Greeks: Delta, Gamma, Vega, Theta, Rho
+* Binomial pricing 
+* Greeks: Delta, Gamma, Vega, Theta, Rho, etc.
 * Implied volatility (Newton–Raphson)
 * Unit tests (arbitrage checks, finite differences)
 * CI with GitHub Actions
@@ -20,7 +21,7 @@ Python library for pricing European options and computing Greeks using analytica
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git clone https://github.com/Mohammadsajjad021/QuantLib-lite--Option-Pricing---Greeks-Engine.git
 cd YOUR_REPO
 pip install -r requirements.txt
 ```
@@ -64,10 +65,3 @@ notebooks/           # demos & visualizations
 * Implied volatility recovery
 * Volatility smile (notebook)
 
----
-
-## Future Work
-
-* Heston model
-* Variance reduction
-* Volatility surface
