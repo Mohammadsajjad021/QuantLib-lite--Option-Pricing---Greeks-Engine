@@ -30,6 +30,14 @@ def simulate_terminal_price_stratified(S0, T, r, sigma, n_sim):
     
     return S0 * np.exp(drift + vol * Z)
 
+def simulate_gbm_paths(S0, T, r, sigma, n_sim, n_steps):
+    dt = T / n_steps
+    Z = np.random.standard_normal((n_sim, n_steps))
+    increments = (r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z
+    log_paths = np.cumsum(increments, axis=1)
+
+    return S0 * np.exp(log_paths)
+
 def monte_carlo_call_naive(S0, K, T, r, sigma, n_sim=100000):
     ST = simulate_terminal_price(S0, T, r, sigma, n_sim)
 
@@ -112,6 +120,23 @@ def monte_carlo_put_stratified(S0, K, T, r, sigma, n_sim=100000):
     ST = simulate_terminal_price_stratified(S0, T, r, sigma, n_sim)
 
     payoff = np.maximum(K - ST, 0)
+
+    return np.exp(-r * T) * np.mean(payoff)
+
+def monte_carlo_asian_call(S0, K, T, r, sigma, n_sim=100000, n_steps=252):
+    paths = simulate_gbm_paths(S0, T, r, sigma, n_sim, n_steps)
+    avg_price = np.mean(paths, axis=1)
+
+    payoff = np.maximum(avg_price - K, 0)
+
+    return np.exp(-r * T) * np.mean(payoff)
+
+
+def monte_carlo_asian_put(S0, K, T, r, sigma, n_sim=100000, n_steps=252):
+    paths = simulate_gbm_paths(S0, T, r, sigma, n_sim, n_steps)
+    avg_price = np.mean(paths, axis=1)
+
+    payoff = np.maximum(K - avg_price, 0)
 
     return np.exp(-r * T) * np.mean(payoff)
 
