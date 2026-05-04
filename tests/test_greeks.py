@@ -33,3 +33,20 @@ def test_delta_finite_difference():
     analytical_delta = delta_call(S, 100, 1, 0.05, 0.2)
 
     assert abs(numerical_delta - analytical_delta) < 1e-3
+
+
+def test_delta_finite_difference_with_dividend_yield():
+    from black_scholes import call_price
+    from greeks import delta_call
+
+    S = 100
+    eps = 1e-4
+    q = 0.02
+
+    price_up = call_price(S + eps, 100, 1, 0.05, 0.2, q)
+    price_down = call_price(S - eps, 100, 1, 0.05, 0.2, q)
+
+    numerical_delta = (price_up - price_down) / (2 * eps)
+    analytical_delta = delta_call(S, 100, 1, 0.05, 0.2, q)
+
+    assert abs(numerical_delta - analytical_delta) < 1e-3

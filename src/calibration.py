@@ -57,17 +57,18 @@ def _validate_market_inputs(S, quote):
         raise ValueError("Market price must be positive")
 
 
-def _price(S, K, T, r, sigma, option_type):
+def _price(S, K, T, r, sigma, option_type, q=0.0):
     if option_type == "call":
-        return call_price(S, K, T, r, sigma)
-    return put_price(S, K, T, r, sigma)
+        return call_price(S, K, T, r, sigma, q)
+    return put_price(S, K, T, r, sigma, q)
 
 
-def _price_bounds(S, K, T, r, option_type):
+def _price_bounds(S, K, T, r, option_type, q=0.0):
     discounted_strike = K * np.exp(-r * T)
+    discounted_spot = S * np.exp(-q * T)
     if option_type == "call":
-        return max(0.0, S - discounted_strike), S
-    return max(0.0, discounted_strike - S), discounted_strike
+        return max(0.0, discounted_spot - discounted_strike), discounted_spot
+    return max(0.0, discounted_strike - discounted_spot), discounted_strike
 
 
 def implied_vol_from_market_price(
@@ -80,6 +81,7 @@ def implied_vol_from_market_price(
     vol_lower=1e-6,
     vol_upper=5.0,
     tol=1e-8,
+    q=0.0,
 ):
     """
     Calibrate Black-Scholes implied volatility from one market option price.
@@ -88,12 +90,12 @@ def implied_vol_from_market_price(
     quote = MarketQuote(K, T, market_price, option_type)
     _validate_market_inputs(S, quote)
 
-    lower_price, upper_price = _price_bounds(S, K, T, r, option_type)
+    lower_price, upper_price = _price_bounds(S, K, T, r, option_type, q)
     if market_price < lower_price - tol or market_price > upper_price + tol:
         raise ValueError("Market price violates no-arbitrage bounds")
 
     def objective(sigma):
-        return _price(S, K, T, r, sigma, option_type) - market_price
+        return _price(S, K, T, r, sigma, option_type, q) - market_price
 
     low_error = objective(vol_lower)
     high_error = objective(vol_upper)
@@ -108,7 +110,7 @@ def implied_vol_from_market_price(
     return brentq(objective, vol_lower, vol_upper, xtol=tol)
 
 
-def calibrate_implied_vols(quotes, S, r, **kwargs):
+def calibrate_implied_vols(quotes, S, r, q=0.0, **kwargs):
     """
     Calibrate an implied volatility for each market quote.
 
@@ -126,6 +128,7 @@ def calibrate_implied_vols(quotes, S, r, **kwargs):
             quote.maturity,
             r,
             quote.option_type,
+            q=q,
             **kwargs,
         )
         results.append(
@@ -140,7 +143,7 @@ def calibrate_implied_vols(quotes, S, r, **kwargs):
     return results
 
 
-def calibrate_flat_volatility(quotes, S, r, vol_lower=1e-6, vol_upper=5.0):
+def calibrate_flat_volatility(quotes, S, r, q=0.0, vol_lower=1e-6, vol_upper=5.0):
     """
     Calibrate one Black-Scholes volatility to a set of market option prices.
     """
@@ -153,8 +156,8 @@ def calibrate_flat_volatility(quotes, S, r, vol_lower=1e-6, vol_upper=5.0):
 
     def squared_error(sigma):
         errors = [
-            _price(S, q.strike, q.maturity, r, sigma, q.option_type) - q.price
-            for q in quotes
+            _price(S, quote.strike, quote.maturity, r, sigma, quote.option_type, q) - quote.price
+            for quote in quotes
         ]
         return float(np.sum(np.square(errors)))
 
@@ -168,8 +171,8 @@ def calibrate_flat_volatility(quotes, S, r, vol_lower=1e-6, vol_upper=5.0):
 
     sigma = float(calibration.x)
     errors = [
-        _price(S, q.strike, q.maturity, r, sigma, q.option_type) - q.price
-        for q in quotes
+        _price(S, quote.strike, quote.maturity, r, sigma, quote.option_type, q) - quote.price
+        for quote in quotes
     ]
     rmse = float(np.sqrt(np.mean(np.square(errors))))
 

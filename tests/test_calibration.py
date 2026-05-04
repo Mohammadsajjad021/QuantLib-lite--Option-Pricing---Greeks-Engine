@@ -66,8 +66,46 @@ def test_calibrate_flat_volatility_recovers_market_sigma():
     assert result["rmse"] < 1e-4
 
 
+def test_calibration_recovers_sigma_with_dividend_yield():
+    from black_scholes import call_price
+    from calibration import calibrate_flat_volatility, implied_vol_from_market_price
+
+    S, K, T, r, sigma, q = 100, 100, 1, 0.05, 0.24, 0.03
+    market_price = call_price(S, K, T, r, sigma, q)
+
+    implied = implied_vol_from_market_price(market_price, S, K, T, r, q=q)
+    result = calibrate_flat_volatility(
+        [{"K": K, "T": T, "market_price": market_price}],
+        S,
+        r,
+        q=q,
+    )
+
+    assert abs(implied - sigma) < 1e-6
+    assert abs(result["sigma"] - sigma) < 1e-4
+
+
 def test_market_price_outside_no_arbitrage_bounds_raises():
     from calibration import implied_vol_from_market_price
 
     with pytest.raises(ValueError, match="no-arbitrage"):
         implied_vol_from_market_price(150, 100, 100, 1, 0.05)
+
+
+def test_put_market_price_below_dividend_adjusted_bound_raises():
+    from calibration import implied_vol_from_market_price
+    import numpy as np
+
+    S, K, T, r, q = 100, 120, 1, 0.01, 0.05
+    lower_bound = K * np.exp(-r * T) - S * np.exp(-q * T)
+
+    with pytest.raises(ValueError, match="no-arbitrage"):
+        implied_vol_from_market_price(
+            lower_bound - 0.01,
+            S,
+            K,
+            T,
+            r,
+            option_type="put",
+            q=q,
+        )

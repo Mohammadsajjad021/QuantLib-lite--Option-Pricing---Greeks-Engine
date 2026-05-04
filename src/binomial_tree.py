@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def binomial_price(S, K, T, r, sigma, n_steps=100, option_type="call", exercise="european"):
+def binomial_price(S, K, T, r, sigma, n_steps=100, option_type="call", exercise="european", q=0.0):
     if S <= 0:
         raise ValueError("Spot price must be positive")
     if K <= 0:
@@ -21,7 +21,7 @@ def binomial_price(S, K, T, r, sigma, n_steps=100, option_type="call", exercise=
     u = np.exp(sigma * np.sqrt(dt))
     d = 1 / u
     discount = np.exp(-r * dt)
-    p = (np.exp(r * dt) - d) / (u - d)
+    p = (np.exp((r - q) * dt) - d) / (u - d)
 
     if not (0 <= p <= 1):
         raise ValueError("Invalid risk-neutral probability; increase n_steps or check inputs")
@@ -51,9 +51,9 @@ def binomial_price(S, K, T, r, sigma, n_steps=100, option_type="call", exercise=
     return option_values[0]
 
 
-def binomial_call(S, K, T, r, sigma, n_steps=100, exercise="european"):
-    return binomial_price(S, K, T, r, sigma, n_steps, option_type="call", exercise=exercise)
+def binomial_call(S, K, T, r, sigma, n_steps=100, exercise="european", q=0.0):
+    return binomial_price(S, K, T, r, sigma, n_steps, option_type="call", exercise=exercise, q=q)
 
 
-def binomial_put(S, K, T, r, sigma, n_steps=100, exercise="european"):
-    return binomial_price(S, K, T, r, sigma, n_steps, option_type="put", exercise=exercise)
+def binomial_put(S, K, T, r, sigma, n_steps=100, exercise="european", q=0.0):
+    return binomial_price(S, K, T, r, sigma, n_steps, option_type="put", exercise=exercise, q=q)

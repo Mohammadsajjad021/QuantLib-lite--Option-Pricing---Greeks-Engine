@@ -37,6 +37,8 @@ from quant_pricing.implied_vol import implied_vol
 
 price = call_price(100, 100, 1, 0.05, 0.2)
 iv = implied_vol(price, 100, 100, 1, 0.05)
+
+dividend_price = call_price(100, 100, 1, 0.05, 0.2, q=0.02)
 ```
 
 ### Market calibration
@@ -50,8 +52,8 @@ quotes = [
     {"K": 110, "T": 1.5, "market_price": 12.25, "type": "put"},
 ]
 
-surface = calibrate_implied_vols(quotes, S=100, r=0.05)
-flat_vol = calibrate_flat_volatility(quotes, S=100, r=0.05)
+surface = calibrate_implied_vols(quotes, S=100, r=0.05, q=0.02)
+flat_vol = calibrate_flat_volatility(quotes, S=100, r=0.05, q=0.02)
 ```
 
 ---
